@@ -1,5 +1,7 @@
 # Gepetto SDK
 
+[![npm](https://img.shields.io/npm/v/@gepetto/sdk)](https://www.npmjs.com/package/@gepetto/sdk)
+
 The official TypeScript / JavaScript SDK of the [Gepetto API v2](https://docs.gepettoapp.com): real estate photo editing. Enhance a photo, declutter a room, furnish it, change the sky, restyle it, repaint walls and floors, upscale. One call, an image URL in return.
 
 ```bash
