@@ -369,9 +369,9 @@ export class Gepetto {
   }
 
   // --- Tools: each waits for the image and resolves with the finished job, or throws a GepettoError. With `webhook`,
-  // it resolves at once with the pending job. Prices and output sizes: docs, Pricing and Images and masks.
+  // it resolves at once with the pending job. Output sizes: docs, Images and masks.
 
-  /** Empty the whole room, or remove what a mask covers. 0.30 € per successful render. */
+  /** Empty the whole room, or remove what a mask covers. */
   declutter(params: DeclutterParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   declutter(params: DeclutterParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   declutter(params: DeclutterParams, options?: RequestOptions): Promise<Job>;
@@ -379,8 +379,7 @@ export class Gepetto {
     return this.#render('/declutter', params, options);
   }
 
-  /** Furnish a whole room (`roomId` + `styleId`), or the zone of a mask (as a room, or with one `furnitureId`).
-   * 0.30 € per successful render. */
+  /** Furnish a whole room (`roomId` + `styleId`), or the zone of a mask (as a room, or with one `furnitureId`). */
   furnish(params: FurnishParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   furnish(params: FurnishParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   furnish(params: FurnishParams, options?: RequestOptions): Promise<Job>;
@@ -388,7 +387,7 @@ export class Gepetto {
     return this.#render('/furnish', params, options);
   }
 
-  /** A blue sky (`skyId`) and the matching light, outside or through the windows. 0.30 € per successful render. */
+  /** A blue sky (`skyId`) and the matching light, outside or through the windows. */
   sunshine(params: SunshineParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   sunshine(params: SunshineParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   sunshine(params: SunshineParams, options?: RequestOptions): Promise<Job>;
@@ -396,7 +395,7 @@ export class Gepetto {
     return this.#render('/sunshine', params, options);
   }
 
-  /** The room redesigned in a style. 0.30 € per successful render. */
+  /** The room redesigned in a style. */
   creativeRedesign(params: CreativeRedesignParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   creativeRedesign(params: CreativeRedesignParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   creativeRedesign(params: CreativeRedesignParams, options?: RequestOptions): Promise<Job>;
@@ -404,7 +403,7 @@ export class Gepetto {
     return this.#render('/creative-redesign', params, options);
   }
 
-  /** Repaint the walls, change the floor, or apply a finish: one `surface` per call. 0.30 € per successful render. */
+  /** Repaint the walls, change the floor, or apply a finish: one `surface` per call. */
   surfaces(params: SurfacesParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   surfaces(params: SurfacesParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   surfaces(params: SurfacesParams, options?: RequestOptions): Promise<Job>;
@@ -412,8 +411,7 @@ export class Gepetto {
     return this.#render('/surfaces', params, options);
   }
 
-  /** Light and colours corrected at the size of the photo, nothing redrawn; `straighten` for the verticals.
-   * 0.20 € per successful render. */
+  /** Light and colours corrected at the size of the photo, nothing redrawn; `straighten` for the verticals. */
   enhance(params: EnhanceParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   enhance(params: EnhanceParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   enhance(params: EnhanceParams, options?: RequestOptions): Promise<Job>;
@@ -421,7 +419,7 @@ export class Gepetto {
     return this.#render('/enhance', params, options);
   }
 
-  /** Enlarge an image to about 4 (`2k`) or 16 megapixels (`4k`, the default). 0.10 € per successful render. */
+  /** Enlarge an image to about 4 (`2k`) or 16 megapixels (`4k`, the default). */
   upscale(params: UpscaleParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
   upscale(params: UpscaleParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
   upscale(params: UpscaleParams, options?: RequestOptions): Promise<Job>;
@@ -487,8 +485,8 @@ export class Gepetto {
     return this.#get('/usage');
   }
 
-  /** The payment link of the subscription (100 € excl. tax per month including 100 € of renders). A test key is
-   * enough; once paid, the live key is on https://app.gepettoapp.com/easy/account/api. */
+  /** The payment link of the subscription. A test key is enough; once paid,
+   * the live key is on https://app.gepettoapp.com/easy/account/api. */
   async subscribe(): Promise<{ url: string; message: string }> {
     return this.#json(await this.#send('POST', '/subscribe', { body: {}, idempotencyKey: uniqueId() }));
   }

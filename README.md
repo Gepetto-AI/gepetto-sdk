@@ -168,6 +168,8 @@ new Gepetto({
 
 Keep the key on your server: it gives access to your account and bills it. The SDK refuses to run in a web page.
 
-## Pricing
+## About Gepetto
 
-Test keys are free: 200 renders per account. Live keys: 100 € excl. tax per month including 100 € of renders, then the price of each render. Only successful renders are charged. Details: [docs.gepettoapp.com](https://docs.gepettoapp.com).
+Gepetto is the AI photo studio for real estate professionals. From a single photo, it furnishes an empty room, empties a cluttered one, restyles an interior, replaces a grey sky, repaints walls, changes floors, enhances the picture and animates the property on video, in seconds and with no technical skill. Launched in January 2023 in Bordeaux, France, Gepetto is used by more than 1,000 agencies, networks and real estate photographers, on the web, on iPhone and Android, and through this API inside real estate CRMs and platforms.
+
+[gepettoapp.com](https://gepettoapp.com) · [API documentation](https://docs.gepettoapp.com)
