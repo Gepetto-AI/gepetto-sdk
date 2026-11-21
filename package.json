@@ -1,6 +1,6 @@
 {
   "name": "@gepetto/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official TypeScript / JavaScript SDK of the Gepetto API v2: real estate photo editing (enhance, declutter, furnish, sky, restyle, walls and floors, upscale).",
   "type": "module",
   "main": "./dist/index.cjs",

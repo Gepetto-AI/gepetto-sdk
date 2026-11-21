@@ -5,7 +5,7 @@
  * Methods and fields have the names of the API: what the docs say of an endpoint is true of the method.
  */
 
-export const VERSION = '0.1.1';
+export const VERSION = '0.1.2';
 const DEFAULT_BASE_URL = 'https://europe-west1-gepettoai.cloudfunctions.net/v2';
 /** A render is stopped by the API after 450 s: 10 minutes covers it, retries included. */
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
