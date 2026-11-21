@@ -82,6 +82,10 @@ export interface CompletedJob extends Job {
 /** A public http(s) URL of a JPEG, PNG, WebP or HEIC image (100 megapixels at most). */
 export type ImageUrl = string | URL;
 
+/** A black image with the zone painted in white, drawn on the photo: a public URL, or the image itself in base64 as
+ * a data URL, such as `canvas.toDataURL('image/png')` gives (5 MB at most; a black and white PNG weighs a few KB). */
+export type MaskImage = string | URL;
+
 interface Common {
   /** The photo: a public http(s) URL. */
   url: ImageUrl;
@@ -99,8 +103,8 @@ export type DeclutterParams = Common & (
     keepFireplace?: boolean;
   }
   | {
-    /** A black image with the zone to remove painted in white, drawn on the photo. */
-    mask: ImageUrl;
+    /** The zone to remove, painted in white on black: a URL, or base64 (`canvas.toDataURL('image/png')`). */
+    mask: MaskImage;
   }
 );
 
@@ -112,15 +116,16 @@ export type FurnishParams = Common & (
     styleId: StyleId;
   }
   | {
-    /** A black image with the zone to furnish painted in white, drawn on the photo. */
-    mask: ImageUrl;
+    /** The zone to furnish, painted in white on black: a URL, or base64 (`canvas.toDataURL('image/png')`). */
+    mask: MaskImage;
     /** The zone furnished as a room (mode `zone` in `GET /rooms`). */
     roomId: OrString<KnownZoneRoomId>;
     styleId: StyleId;
     furnitureId?: undefined;
   }
   | {
-    mask: ImageUrl;
+    /** The zone to furnish, painted in white on black: a URL, or base64 (`canvas.toDataURL('image/png')`). */
+    mask: MaskImage;
     /** One piece of furniture in the zone, instead of a room. */
     furnitureId: FurnitureId;
     styleId?: StyleId;

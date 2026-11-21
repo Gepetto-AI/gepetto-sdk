@@ -46,7 +46,7 @@ CommonJS: `const { Gepetto } = require('@gepetto/sdk');`
 
 ## Tools
 
-The `url` (and `mask`) of every tool is a public http(s) URL of a JPEG, PNG, WebP or HEIC image: upload the photo to your own storage first. The output URL is public too; copy the image if you keep it.
+The `url` of every tool is a public http(s) URL of a JPEG, PNG, WebP or HEIC image: upload the photo to your own storage first. The output URL is public too; copy the image if you keep it.
 
 | Method | What it does |
 | --- | --- |
@@ -63,7 +63,7 @@ The `url` (and `mask`) of every tool is a public http(s) URL of a JPEG, PNG, Web
 | `surfaces({ url, surface: 'finish', finishId })` | A finish applied |
 | `upscale({ url, resolution? })` | Enlarged to about 4 (`2k`) or 16 megapixels (`4k`, default) |
 
-A mask is a black image with the zone painted in white, drawn on the photo. Output sizes are in the docs (Images and masks).
+A mask is a black image with the zone painted in white, drawn on the photo. Give its URL, or the image itself in base64: the value of `canvas.toDataURL('image/png')` works as is, so there is nothing to host. Output sizes are in the docs (Images and masks).
 
 Every tool takes a second argument:
 
