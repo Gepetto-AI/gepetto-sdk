@@ -80,6 +80,23 @@ await gepetto.enhance(
 
 A key always answers the job it first started, whatever the tool and even if that render failed: use one key per photo and per tool, and a new key to try a failed render again.
 
+## Videos
+
+Two 6-second videos, as MP4. They need a live key (a test key gets `live_key_required`) and take 2 to 10 minutes: the method waits up to 30 minutes, or returns at once with `webhook`.
+
+| Method | What it does |
+| --- | --- |
+| `cameraMove({ url, camera, timelapse?, resolution? })` | A slow camera move in the photo (`zoom_in`, `zoom_out`, `crane_up`, `crab_left`...), 0.80 € |
+| `transition({ jobId, transitionId })` | From the original of a finished render to its result, 1.60 € |
+| `transition({ url, endUrl, prompt })` | From one photo to another, with your own animation |
+
+```ts
+const staged = await gepetto.furnish({ url, roomId: 'living_room', styleId: 'scandinave' });
+const transitions = await gepetto.listTransitions(); // the animations, with their names
+const video = await gepetto.transition({ jobId: staged.id, transitionId: transitions[0].id });
+console.log(video.output); // https://assets.gepettoapp.com/api/v2/jobs/.../output.mp4
+```
+
 ## Lists
 
 The valid ids, with their names in French, English, Spanish, Portuguese and German:
@@ -89,6 +106,7 @@ await gepetto.listRooms();      // [{ id: 'living_room', name_en: 'Living room',
 await gepetto.listStyles();
 await gepetto.listFurnitures(); // grouped by type: { interior: [...], kitchen: [...], ... }
 await gepetto.listSkies();
+await gepetto.listTransitions(); // for transition
 await gepetto.listSurfaces();   // { walls, floors, finishes }
 ```
 

@@ -9,6 +9,8 @@ export const VERSION = '0.1.3';
 const DEFAULT_BASE_URL = 'https://europe-west1-gepettoai.cloudfunctions.net/v2';
 /** A render is stopped by the API after 450 s: 10 minutes covers it, retries included. */
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
+/** A video takes 2 to 10 minutes; the API gives it up after 30. */
+const VIDEO_TIMEOUT_MS = 30 * 60 * 1000;
 const DEFAULT_MAX_RETRIES = 2;
 const POLL_INTERVAL_MS = 2500;
 
@@ -49,7 +51,7 @@ export type FinishId = OrString<KnownFinishId>;
 
 // --- Jobs ----------------------------------------------------------------------------------------------------------
 
-export type Tool = 'declutter' | 'furnish' | 'sunshine' | 'creative-redesign' | 'surfaces' | 'enhance' | 'upscale';
+export type Tool = 'declutter' | 'furnish' | 'sunshine' | 'creative-redesign' | 'surfaces' | 'enhance' | 'upscale' | 'camera-move' | 'transition';
 export type JobStatus = 'pending' | 'processing' | 'success' | 'error';
 
 /** A render, as the API returns it (synchronous answer, `GET /job/{id}`, webhook body). */
@@ -58,9 +60,11 @@ export interface Job {
   status: JobStatus;
   tool: Tool;
   /** declutter and furnish: `auto` or `zone`; sunshine: the sky id; surfaces: `walls`, `floor` or `finish`;
-   * enhance: `straighten` or null; upscale: `2k` or `4k`; creative-redesign: null. */
+   * enhance: `straighten` or null; upscale: `2k` or `4k`; creative-redesign: null; camera-move: the camera;
+   * transition: the transitionId, or `custom`. */
   mode: string | null;
-  /** The image, once `status` is `success`. Public URL: copy it to your storage if you keep it. */
+  /** The image (an MP4 video for camera-move and transition), once `status` is `success`. Public URL: copy it to
+   * your storage if you keep it. */
   output: string | null;
   error: { code: string; message: string } | null;
   /** Price in euro cents (0 with a test key; charged only on success). */
@@ -182,6 +186,53 @@ export interface UpscaleParams extends Common {
   resolution?: '2k' | '4k';
 }
 
+/** The camera moves of `cameraMove`. */
+export type CameraMove =
+  | 'zoom_in' | 'zoom_out' | 'zoom_in_pan_left' | 'zoom_in_pan_right'
+  | 'crane_up' | 'crane_down' | 'crab_left' | 'crab_right';
+
+export interface CameraMoveParams extends Common {
+  camera: CameraMove;
+  /** The hours of the day passing, with the lights turning on, ending at night. */
+  timelapse?: boolean;
+  /** `1080p` by default. */
+  resolution?: '768p' | '1080p';
+}
+
+/** The two images of a transition: a finished job of your account, or two URLs of the same proportions. */
+type TransitionImages =
+  | {
+    /** A finished image job: its original goes to its result. */
+    jobId: string;
+    url?: undefined;
+    endUrl?: undefined;
+  }
+  | {
+    /** The photo before. */
+    url: ImageUrl;
+    /** The photo after, same proportions. */
+    endUrl: ImageUrl;
+    jobId?: undefined;
+  };
+
+/** The animation: one of `listTransitions()`, or your own prompt. */
+type TransitionAnimation =
+  | { transitionId: string; prompt?: undefined; negativePrompt?: undefined }
+  | {
+    /** Your own animation, in English (2000 characters at most), sent as it is. */
+    prompt: string;
+    /** What the video must avoid. */
+    negativePrompt?: string;
+    transitionId?: undefined;
+  };
+
+export type TransitionParams = TransitionImages & TransitionAnimation & { webhook?: string | URL };
+
+export interface Transition extends NamedItem {
+  /** A sample video, when there is one. */
+  preview: string | null;
+}
+
 /** Options of one call. */
 export interface RequestOptions {
   /** Any unique string (your photo id, for example): the same key never starts, nor bills, a second render. One is
@@ -275,7 +326,7 @@ export type ErrorCode = OrString<
   | 'unsupported_image' | 'image_too_large' | 'mask_size_mismatch' | 'empty_mask' | 'unknown_room'
   | 'mode_not_available' | 'unknown_style' | 'unknown_furniture' | 'unknown_sky' | 'unknown_wall_type'
   | 'unknown_floor_type' | 'unknown_finish' | 'missing_api_key' | 'invalid_api_key' | 'api_key_inactive'
-  | 'test_limit_reached' | 'api_v2_subscription_required' | 'job_not_found' | 'not_found' | 'account_not_found'
+  | 'test_limit_reached' | 'live_key_required' | 'unknown_camera' | 'unknown_transition' | 'images_mismatch' | 'api_v2_subscription_required' | 'job_not_found' | 'not_found' | 'account_not_found'
   | 'already_subscribed' | 'api_v1_subscription_active' | 'rate_limited' | 'internal_error' | 'render_failed'
   | 'render_timeout' | 'connection_error' | 'timeout' | 'aborted' | 'invalid_response' | 'invalid_signature'
 >;
@@ -432,6 +483,25 @@ export class Gepetto {
     return this.#render('/upscale', params, options);
   }
 
+  // --- Videos: 6 seconds, MP4, live keys only. They take 2 to 10 minutes: the method waits up to 30 minutes
+  // (or set `timeout`), or returns at once with `webhook`.
+
+  /** A slow camera move in the photo. 0.80 € per video. */
+  cameraMove(params: CameraMoveParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
+  cameraMove(params: CameraMoveParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
+  cameraMove(params: CameraMoveParams, options?: RequestOptions): Promise<Job>;
+  cameraMove(params: CameraMoveParams, options: RequestOptions = {}): Promise<Job> {
+    return this.#render('/video/camera-move', params, { ...options, timeout: options.timeout ?? VIDEO_TIMEOUT_MS });
+  }
+
+  /** From a photo to its edited version: `jobId` of a finished render, or `url` and `endUrl`. 1.60 € per video. */
+  transition(params: TransitionParams & { webhook: string | URL }, options?: RequestOptions): Promise<Job>;
+  transition(params: TransitionParams & { webhook?: undefined }, options?: RequestOptions): Promise<CompletedJob>;
+  transition(params: TransitionParams, options?: RequestOptions): Promise<Job>;
+  transition(params: TransitionParams, options: RequestOptions = {}): Promise<Job> {
+    return this.#render('/video/transition', params, { ...options, timeout: options.timeout ?? VIDEO_TIMEOUT_MS });
+  }
+
   // --- Jobs
 
   /** A job as it is now. */
@@ -471,6 +541,11 @@ export class Gepetto {
 
   listSkies(): Promise<NamedItem[]> {
     return this.#get('/skies');
+  }
+
+  /** The animations of `transition`, for `transitionId`. */
+  listTransitions(): Promise<Transition[]> {
+    return this.#get('/video/transitions');
   }
 
   /** Wall colours, floors and finishes, for `surfaces`. */
